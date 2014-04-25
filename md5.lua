@@ -64,7 +64,7 @@ function md5.transform(A,B,C,D)
   	    a=band(a+f(b,c,d)+x+ac,md5.ff)
 	    -- be *very* careful that left shift does not cause rounding!
 
-      md5.midOp:fire(f,a,b,c,d,x,s,ac,POSH)
+
       local ret = bor(lshift(band(a,rshift(md5.ff,s)),s),rshift(a,32-s))+b
 	   	ret = ret % (2^32)
 	   	md5.endOp:fire(f,ret,b,c,d,x,s,ac,POSH)
@@ -200,6 +200,6 @@ end
 md5.beginOp = event.create()
 md5.endOp = event.create()
 md5.endBlock = event.create()
-md5.midOp = event.create()
+
 
 return md5
