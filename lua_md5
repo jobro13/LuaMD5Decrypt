@@ -1,0 +1,81 @@
+local bit = require "bit"
+local color = require "color"
+local event = require "event"
+local md5 = require "md5"
+
+-- pos to change: 1
+-- a == a
+-- b == b
+-- c == c 
+-- d == d 
+
+-- pos to change : 4
+-- a == d 
+-- b == a
+-- c == b
+-- d == c
+
+function GetString(a,b,c,d,pos)
+    local t = {a,b,c,d}
+    local mutate = pos - 1
+    local function tswap()
+        local new = {}
+        local mute = {2,3,4,1}
+        for i = 1,4 do 
+            new[i] =t[mute[i]]
+        end 
+        t = new 
+    end 
+    for i = 1, mutate do 
+        tswap()
+    end 
+    return t 
+end 
+
+function ShowByteDiff(Byte1, Byte2, len)
+    local old = bit.tostr(bit.tobits(Byte1),len)
+        local new = bit.tostr(bit.tobits(Byte2),len)
+        print(old)
+        for i = 1, 32 do 
+            if old:sub(i,i) == new:sub(i,i) then 
+                color("%{green}")
+            else 
+                color("%{red}")
+            end 
+            io.write(new:sub(i,i))
+        end 
+        color.reset()
+        io.write("\n\n")
+    end
+
+local Start
+
+function BeginOperation(ShiftFunction, StartByte, Byte1, Byte2, Byte3, PreviousStateByte, LeftShifts, ConstValue, PosToChange)
+    local hash = md5.state_tostr(unpack(GetString(StartByte, Byte1, Byte2, Byte3, PosToChange)))
+    Start = StartByte
+end 
+
+function EndOperation(ShiftFunction, StartByte, Byte1, Byte2, Byte3, PreviousStateByte, LeftShifts, ConstValue, PosToChange)
+        local hash = md5.state_tostr(unpack(GetString(StartByte, Byte1, Byte2, Byte3, PosToChange)))
+        print(bit.tostr(bit.tobits(StartByte)))
+        ShowByteDiff(Start, StartByte, 32)
+        io.write(string.rep("<", LeftShifts).."\n\n\n")
+end 
+
+function MidOperation(ShiftFunction, StartByte, Byte1, Byte2, Byte3, PreviousStateByte, LeftShifts, ConstValue, PosToChange)
+    print(bit.tostr(bit.tobits(StartByte)))
+
+end
+
+
+
+md5.beginOp:connect(BeginOperation)
+md5.endOp:connect(EndOperation)
+md5.endBlock:connect(function(a,b,c,d, A, B, C, D)
+
+end)
+md5.midOp:connect(MidOperation)
+
+print(md5.Calc"")
+
+print("Program exited succesfully.")
